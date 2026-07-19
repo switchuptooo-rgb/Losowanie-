@@ -1,4 +1,4 @@
-# ⚽ Kapitan
+# ⚽ Dokersi-losowanie
 
 Aplikacja do losowania zbalansowanych drużyn na amatorskie mecze piłki nożnej.
 Działa jako **PWA** — instaluje się na telefonie z ekranu głównego i działa offline.
@@ -40,7 +40,7 @@ npm run preview  # podgląd zbudowanej wersji
    ```bash
    git init
    git add .
-   git commit -m "Kapitan"
+   git commit -m "Dokersi-losowanie"
    git branch -M main
    git remote add origin https://github.com/TWOJ_LOGIN/kapitan.git
    git push -u origin main

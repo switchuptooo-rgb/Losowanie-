@@ -10,7 +10,9 @@ const TEAMS = [
   { key: "A", name: "Drużyna 1", nick: "Czarni", color: "#1a1a1a", text: "#ffffff", label: "#1a1a1a", soft: "#e5e5e5", ring: "#3f3f46" },
   { key: "B", name: "Drużyna 2", nick: "Biali", color: "#ffffff", text: "#1a1a1a", label: "#64748b", soft: "#f8fafc", ring: "#cbd5e1" },
 ];
-const PITCH = "#14532d";
+const PITCH = "#171717";
+const GOLD = "#f59e0b";
+const LOGO = "data:image/jpeg;base64,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";
 const STORAGE_KEY = "kapitan:data:v1";
 const CATS = [
   { k: "shots", label: "Strzały" },
@@ -166,7 +168,7 @@ function Tab({ active, onClick, icon: Icon, label }) {
     >
       <Icon size={22} strokeWidth={active ? 2.4 : 2} />
       <span className="text-xs font-semibold">{label}</span>
-      <span className="h-1 w-8 rounded-full" style={{ background: active ? PITCH : "transparent" }} />
+      <span className="h-1 w-8 rounded-full" style={{ background: active ? GOLD : "transparent" }} />
     </button>
   );
 }
@@ -217,6 +219,7 @@ export default function App() {
   const [tab, setTab] = useState("players");
   const [toast, setToast] = useState("");
   const [shareText, setShareText] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
   const loaded = useRef(false);
 
   /* load */
@@ -249,6 +252,48 @@ export default function App() {
 
   const flash = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
   const share = (t) => setShareText(t);
+  const exportData = () => JSON.stringify({ _app: "kapitan", _v: 1, players, pairs, matches, settings, dismissed, lastDraw }, null, 2);
+  const importData = (raw) => {
+    try {
+      const d = JSON.parse(raw);
+      if (!d || !Array.isArray(d.players)) return false;
+      setPlayers(d.players || []);
+      setPairs(d.pairs || []);
+      setMatches(d.matches || []);
+      setSettings(d.settings || { streakThreshold: 5 });
+      setDismissed(d.dismissed || {});
+      setLastDraw(d.lastDraw || null);
+      return true;
+    } catch { return false; }
+  };
+
+  const dataBlob = () => JSON.stringify({ players, pairs, matches, settings, dismissed, lastDraw, _kapitan: 1 });
+  const exportAllText = () => share(dataBlob());
+  const downloadAll = () => {
+    try {
+      const blob = new Blob([dataBlob()], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "kapitan-dane.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      flash("Pobrano plik z danymi");
+    } catch { flash("Nie udało się pobrać pliku"); }
+  };
+  const importAll = (text) => {
+    try {
+      const d = JSON.parse(text);
+      if (!d || typeof d !== "object") throw new Error("bad");
+      setPlayers(Array.isArray(d.players) ? d.players : []);
+      setPairs(Array.isArray(d.pairs) ? d.pairs : []);
+      setMatches(Array.isArray(d.matches) ? d.matches : []);
+      setSettings(d.settings || { streakThreshold: 5 });
+      setDismissed(d.dismissed || {});
+      setLastDraw(d.lastDraw || null);
+      setImportOpen(false);
+      flash("Dane wczytane");
+    } catch { flash("Niepoprawne dane — sprawdź, czy wkleiłeś cały kod"); }
+  };
 
   const stats = useMemo(() => computeStats(players, matches), [players, matches]);
   const present = players.filter((p) => p.present);
@@ -284,19 +329,17 @@ export default function App() {
         {/* header */}
         <header
           className="px-5 pt-5 pb-4 text-white sticky top-0 z-20"
-          style={{ background: PITCH, backgroundImage: "radial-gradient(circle at 100% 0%, rgba(255,255,255,.09), transparent 45%)" }}
+          style={{ background: PITCH, borderBottom: `3px solid ${GOLD}` }}
         >
-          <div className="flex items-center gap-2">
-            <div className="grid place-items-center h-9 w-9 rounded-full" style={{ background: "rgba(255,255,255,.15)" }}>
-              <Crown size={20} />
-            </div>
+          <div className="flex items-center gap-3">
+            <img src={LOGO} alt="Dokersi" className="h-11 w-11 rounded-lg object-cover" />
             <div>
-              <h1 className="text-xl font-black tracking-tight leading-none">Kapitan</h1>
-              <p className="text-xs opacity-75 mt-0.5">Losowanie drużyn na osiedlowe mecze</p>
+              <h1 className="text-xl font-black tracking-tight leading-none">Dokersi</h1>
+              <p className="text-xs mt-0.5" style={{ color: GOLD }}>Losowanie drużyn</p>
             </div>
             <div className="ml-auto text-right">
               <div className="text-2xl font-black leading-none">{present.length}</div>
-              <div className="text-[10px] opacity-75 uppercase tracking-wide">obecni</div>
+              <div className="text-[10px] uppercase tracking-wide" style={{ color: GOLD }}>obecni</div>
             </div>
           </div>
         </header>
@@ -322,6 +365,7 @@ export default function App() {
               settings={settings} setSettings={setSettings}
               dismissed={dismissed} setDismissed={setDismissed}
               patch={patch} setMatches={setMatches} flash={flash} share={share}
+              exportData={exportData} importData={importData}
             />
           )}
         </main>
@@ -543,7 +587,7 @@ function RulesSection({ open, setOpen, players, byId, pairs, setPairs, flash }) 
               <Ban size={14} /> Nie razem
             </button>
             <button onClick={() => setType("link")} className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-lg border"
-              style={{ borderColor: type === "link" ? "#059669" : "#dbe2e5", color: type === "link" ? "#047857" : "#94a3b8", background: type === "link" ? "#ecfdf5" : "white" }}>
+              style={{ borderColor: type === "link" ? "#059669" : "#dbe2e5", color: type === "link" ? "#047857" : "#94a3b8", background: type === "link" ? "#fffbeb" : "white" }}>
               <Link2 size={14} /> Zawsze razem
             </button>
           </div>
@@ -562,7 +606,7 @@ function RulesSection({ open, setOpen, players, byId, pairs, setPairs, flash }) 
 
           <div className="space-y-1.5">
             {pairs.map((p) => (
-              <div key={p.id} className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg" style={{ background: p.type === "block" ? "#fef2f2" : "#ecfdf5" }}>
+              <div key={p.id} className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg" style={{ background: p.type === "block" ? "#fef2f2" : "#fffbeb" }}>
                 {p.type === "block" ? <Ban size={14} className="text-red-500 shrink-0" /> : <Link2 size={14} className="text-emerald-600 shrink-0" />}
                 <span className="truncate text-slate-700">{byId[p.a]?.name} {p.type === "block" ? "≠" : "="} {byId[p.b]?.name}</span>
                 <button onClick={() => setPairs((xs) => xs.filter((x) => x.id !== p.id))} className="ml-auto text-slate-400 p-1"><X size={16} /></button>
@@ -664,11 +708,11 @@ function DrawTab({ present, players, pairs, byId, lastDraw, setLastDraw, setMatc
         </p>
         <div className="flex gap-1.5 mb-3">
           <button onClick={() => setMode("balanced")} className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-lg border"
-            style={{ borderColor: mode === "balanced" ? PITCH : "#dbe2e5", color: mode === "balanced" ? PITCH : "#94a3b8", background: mode === "balanced" ? "#ecfdf5" : "white" }}>
+            style={{ borderColor: mode === "balanced" ? PITCH : "#dbe2e5", color: mode === "balanced" ? PITCH : "#94a3b8", background: mode === "balanced" ? "#fffbeb" : "white" }}>
             <BarChart3 size={14} /> Wg umiejętności
           </button>
           <button onClick={() => setMode("random")} className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-lg border"
-            style={{ borderColor: mode === "random" ? PITCH : "#dbe2e5", color: mode === "random" ? PITCH : "#94a3b8", background: mode === "random" ? "#ecfdf5" : "white" }}>
+            style={{ borderColor: mode === "random" ? PITCH : "#dbe2e5", color: mode === "random" ? PITCH : "#94a3b8", background: mode === "random" ? "#fffbeb" : "white" }}>
             <Shuffle size={14} /> Losowo
           </button>
         </div>
@@ -806,10 +850,41 @@ function DrawTab({ present, players, pairs, byId, lastDraw, setLastDraw, setMatc
 }
 
 /* ------------------------------- STATS TAB -------------------------------- */
-function StatsTab({ players, matches, stats, byId, settings, setSettings, dismissed, setDismissed, patch, setMatches, flash, share }) {
+function StatsTab({ players, matches, stats, byId, settings, setSettings, dismissed, setDismissed, patch, setMatches, flash, share, exportData, importData }) {
   const [histOpen, setHistOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [dataOpen, setDataOpen] = useState(false);
+  const [pendingImport, setPendingImport] = useState(null);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const fileRef = useRef(null);
   const th = settings.streakThreshold;
+
+  const downloadFile = () => {
+    try {
+      const blob = new Blob([exportData()], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `kapitan-dane-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      flash("Plik pobrany — wyślij go innym");
+    } catch { flash("Nie udało się pobrać pliku"); }
+  };
+  const onFile = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => setPendingImport(String(r.result));
+    r.readAsText(f);
+    e.target.value = "";
+  };
+  const applyImport = () => {
+    const ok = importData(pendingImport);
+    flash(ok ? "Dane wczytane" : "Nieprawidłowy plik lub tekst");
+    setPendingImport(null); setPasteText(""); setPasteOpen(false);
+  };
 
   const suggestions = players
     .map((p) => ({ p, s: stats[p.id] }))
@@ -862,7 +937,7 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
           {suggestions.map(({ p, s }) => {
             const up = s.streak > 0;
             return (
-              <div key={p.id} className="rounded-2xl p-3 border flex items-center gap-3" style={{ background: up ? "#ecfdf5" : "#fef2f2", borderColor: up ? "#a7f3d0" : "#fecaca" }}>
+              <div key={p.id} className="rounded-2xl p-3 border flex items-center gap-3" style={{ background: up ? "#fffbeb" : "#fef2f2", borderColor: up ? "#a7f3d0" : "#fecaca" }}>
                 {up ? <TrendingUp className="text-emerald-600 shrink-0" size={22} /> : <TrendingDown className="text-red-500 shrink-0" size={22} />}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-800">{p.name}</p>
@@ -951,6 +1026,44 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
           <Copy size={16} /> Eksportuj wyniki meczów
         </button>
       )}
+
+      {/* dane */}
+      <section className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#e9eef0" }}>
+        <button onClick={() => setDataOpen(!dataOpen)} className="w-full flex items-center gap-2 p-4">
+          <h2 className="font-bold text-sm text-slate-700">Kopia i synchronizacja danych</h2>
+          <span className="ml-auto text-slate-300">{dataOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</span>
+        </button>
+        {dataOpen && (
+          <div className="px-4 pb-4 space-y-2">
+            <p className="text-xs text-slate-400">Eksportuj wszystkie dane i wyślij je innym (plik przez WhatsApp albo tekst). Oni wczytują u siebie, żeby mieć ten sam skład i wyniki.</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={downloadFile} className="text-sm font-bold py-2.5 rounded-xl border" style={{ borderColor: "#dbe2e5", color: PITCH }}>Eksportuj plik</button>
+              <button onClick={() => share(exportData())} className="text-sm font-bold py-2.5 rounded-xl border" style={{ borderColor: "#dbe2e5", color: PITCH }}>Eksportuj tekst</button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => fileRef.current && fileRef.current.click()} className="text-sm font-bold py-2.5 rounded-xl text-white" style={{ background: PITCH }}>Wczytaj z pliku</button>
+              <button onClick={() => setPasteOpen((v) => !v)} className="text-sm font-bold py-2.5 rounded-xl text-white" style={{ background: PITCH }}>Wklej i wczytaj</button>
+            </div>
+            <input ref={fileRef} type="file" accept="application/json,.json,.txt" onChange={onFile} style={{ display: "none" }} />
+            {pasteOpen && (
+              <div className="space-y-2">
+                <textarea value={pasteText} onChange={(e) => setPasteText(e.target.value)} rows={4} placeholder="Wklej tutaj dane otrzymane od kogoś…"
+                  className="w-full text-xs rounded-xl border px-3 py-2 resize-none outline-none" style={{ borderColor: "#dbe2e5" }} />
+                <button onClick={() => setPendingImport(pasteText)} disabled={!pasteText.trim()} className="w-full text-sm font-bold py-2.5 rounded-xl text-white disabled:opacity-40" style={{ background: PITCH }}>Wczytaj wklejone</button>
+              </div>
+            )}
+            {pendingImport !== null && (
+              <div className="rounded-xl p-3 border space-y-2" style={{ borderColor: "#fde68a", background: "#fffbeb" }}>
+                <p className="text-sm text-slate-700">Wczytać te dane? Zastąpią wszystkich graczy i wyniki na tym telefonie.</p>
+                <div className="flex gap-2">
+                  <button onClick={() => setPendingImport(null)} className="flex-1 text-sm font-bold py-2 rounded-lg border bg-white text-slate-500" style={{ borderColor: "#e2e8f0" }}>Anuluj</button>
+                  <button onClick={applyImport} className="flex-1 text-sm font-bold py-2 rounded-lg text-white" style={{ background: "#d97706" }}>Wczytaj</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
 
       {/* reset */}
       {matches.length > 0 && (
