@@ -3,6 +3,7 @@ import {
   Users, Shuffle, BarChart3, Star, Plus, Trash2, Copy, RotateCcw,
   Hand, Check, X, Link2, Ban, TrendingUp, TrendingDown, UserPlus,
   ClipboardPaste, Pin, ChevronDown, ChevronUp, Crown, AlertTriangle, ArrowDown, ArrowUp,
+  Search, ArrowDownAZ, ArrowUpAZ,
 } from "lucide-react";
 
 /* ---------------------------------- meta ---------------------------------- */
@@ -24,7 +25,7 @@ const CATS = [
 /* -------------------------------- helpers --------------------------------- */
 const uid = () => Math.random().toString(36).slice(2, 9);
 const overall = (p) => (p ? CATS.reduce((s, c) => s + (p[c.k] || 0), 0) : 0);
-const avg = (p) => (p ? (overall(p) / CATS.length).toFixed(1) : "0.0");
+const avg = (p) => (p ? `${overall(p)}/20` : "0/20");
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
 function computeStats(players, matches) {
@@ -208,12 +209,122 @@ function ShareModal({ text, onClose }) {
   );
 }
 
+/* ---------------------------- share-link helpers --------------------------- */
+const encodePayload = (obj) => {
+  try { return btoa(encodeURIComponent(JSON.stringify(obj))); } catch { return ""; }
+};
+const decodePayload = (str) => {
+  try { return JSON.parse(decodeURIComponent(atob(str))); } catch { return null; }
+};
+const readViewHash = () => {
+  try {
+    const h = window.location.hash || "";
+    const i = h.indexOf("#v=");
+    return i === 0 ? decodePayload(h.slice(3)) : null;
+  } catch { return null; }
+};
+
+function ViewerScreen({ data }) {
+  const [tab, setTab] = useState("table");
+  return (
+    <div className="min-h-screen w-full flex justify-center" style={{ background: "#f1f5f2", fontFamily: "system-ui, sans-serif" }}>
+      <div className="w-full max-w-md flex flex-col min-h-screen">
+        <header className="px-5 pt-5 pb-4 text-white" style={{ background: PITCH, borderBottom: `3px solid ${GOLD}` }}>
+          <div className="flex items-center gap-3">
+            <img src={LOGO} alt="Dokersi" className="h-11 w-11 rounded-lg object-cover" />
+            <div>
+              <h1 className="text-xl font-black tracking-tight leading-none">Dokersi</h1>
+              <p className="text-xs mt-0.5" style={{ color: GOLD }}>Podgląd wyników</p>
+            </div>
+          </div>
+        </header>
+
+        <div className="px-4 py-4 space-y-4 pb-10">
+          <p className="text-xs text-slate-400 text-center">Stan na {data.t || "—"} · podgląd tylko do odczytu</p>
+
+          {data.d && (data.d.A?.length || data.d.B?.length) ? (
+            <section className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#e9eef0" }}>
+              <div className="px-4 py-2.5 text-sm font-bold text-slate-700" style={{ background: "#f8fafb" }}>Ostatnie składy</div>
+              <div className="grid grid-cols-2 divide-x" style={{ borderColor: "#f1f5f4" }}>
+                {[["Czarni", data.d.A || []], ["Biali", data.d.B || []]].map(([nick, list]) => (
+                  <div key={nick} className="p-3">
+                    <p className="text-xs font-black text-slate-500 mb-1">{nick}</p>
+                    {list.map((n, i) => <p key={i} className="text-sm text-slate-700">{n}</p>)}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#e9eef0" }}>
+            <div className="flex" style={{ background: "#f8fafb" }}>
+              {[["table", "Bilans graczy"], ["hist", "Mecze"]].map(([k, l]) => (
+                <button key={k} onClick={() => setTab(k)} className="flex-1 py-2.5 text-xs font-bold"
+                  style={{ color: tab === k ? PITCH : "#94a3b8", borderBottom: tab === k ? `2px solid ${GOLD}` : "2px solid transparent" }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            {tab === "table" ? (
+              <>
+                <div className="grid grid-cols-12 gap-1 px-4 py-2 text-[11px] font-bold text-slate-400 uppercase">
+                  <span className="col-span-5">Gracz</span>
+                  <span className="col-span-2 text-center">Mecze</span>
+                  <span className="col-span-3 text-center">W-R-P</span>
+                  <span className="col-span-2 text-center">%</span>
+                </div>
+                <div className="divide-y" style={{ borderColor: "#f1f5f4" }}>
+                  {(data.p || []).map((r, i) => {
+                    const [name, played, w, d, l, pct] = r;
+                    return (
+                      <div key={i} className="grid grid-cols-12 gap-1 px-4 py-2.5 items-center text-sm">
+                        <span className="col-span-5 truncate font-medium text-slate-800">{name}</span>
+                        <span className="col-span-2 text-center text-slate-500">{played}</span>
+                        <span className="col-span-3 text-center text-slate-500 text-xs">{w}-{d}-{l}</span>
+                        <span className="col-span-2 text-center font-bold" style={{ color: pct >= 50 ? "#059669" : "#94a3b8" }}>{pct}%</span>
+                      </div>
+                    );
+                  })}
+                  {!(data.p || []).length && <p className="text-center text-sm text-slate-400 py-8">Brak danych.</p>}
+                </div>
+              </>
+            ) : (
+              <div className="p-3 space-y-1.5">
+                {(data.m || []).map((r, i) => {
+                  const [date, winner, a, b] = r;
+                  const label = winner === "draw" ? "Remis" : winner === "A" ? "Czarni ↑" : "Biali ↑";
+                  return (
+                    <div key={i} className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg" style={{ background: "#f8fafb" }}>
+                      <span className="text-xs text-slate-400">{date}</span>
+                      <span className="text-xs text-slate-400">{a}v{b}</span>
+                      <span className="ml-auto font-bold text-xs text-slate-600">{label}</span>
+                    </div>
+                  );
+                })}
+                {!(data.m || []).length && <p className="text-center text-sm text-slate-400 py-8">Brak meczów.</p>}
+              </div>
+            )}
+          </section>
+
+          <button
+            onClick={() => { try { window.location.hash = ""; window.location.reload(); } catch {} }}
+            className="w-full text-sm font-bold py-3 rounded-xl border bg-white" style={{ borderColor: "#dbe2e5", color: PITCH }}
+          >
+            Otwórz pełną aplikację
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------------------------- app ----------------------------------- */
 export default function App() {
+  const [viewData] = useState(() => readViewHash());
   const [players, setPlayers] = useState([]);
   const [pairs, setPairs] = useState([]);
   const [matches, setMatches] = useState([]);
-  const [settings, setSettings] = useState({ streakThreshold: 5 });
+  const [settings, setSettings] = useState({ streakThreshold: 5, autoRate: true });
   const [dismissed, setDismissed] = useState({}); // playerId -> streak value dismissed
   const [lastDraw, setLastDraw] = useState(null); // {teamA, teamB, saved}
   const [tab, setTab] = useState("players");
@@ -231,7 +342,7 @@ export default function App() {
         setPlayers(d.players || []);
         setPairs(d.pairs || []);
         setMatches(d.matches || []);
-        setSettings(d.settings || { streakThreshold: 5 });
+        setSettings({ streakThreshold: 5, autoRate: true, ...(d.settings || {}) });
         setDismissed(d.dismissed || {});
         setLastDraw(d.lastDraw || null);
       }
@@ -260,7 +371,7 @@ export default function App() {
       setPlayers(d.players || []);
       setPairs(d.pairs || []);
       setMatches(d.matches || []);
-      setSettings(d.settings || { streakThreshold: 5 });
+      setSettings({ streakThreshold: 5, autoRate: true, ...(d.settings || {}) });
       setDismissed(d.dismissed || {});
       setLastDraw(d.lastDraw || null);
       return true;
@@ -287,7 +398,7 @@ export default function App() {
       setPlayers(Array.isArray(d.players) ? d.players : []);
       setPairs(Array.isArray(d.pairs) ? d.pairs : []);
       setMatches(Array.isArray(d.matches) ? d.matches : []);
-      setSettings(d.settings || { streakThreshold: 5 });
+      setSettings({ streakThreshold: 5, autoRate: true, ...(d.settings || {}) });
       setDismissed(d.dismissed || {});
       setLastDraw(d.lastDraw || null);
       setImportOpen(false);
@@ -305,6 +416,8 @@ export default function App() {
     setPlayers((ps) => ps.filter((p) => p.id !== id));
     setPairs((xs) => xs.filter((x) => x.a !== id && x.b !== id));
   };
+
+  if (viewData) return <ViewerScreen data={viewData} />;
 
   const addFromText = (text, asGuest) => {
     const names = text
@@ -357,6 +470,7 @@ export default function App() {
             <DrawTab
               present={present} players={players} pairs={pairs} byId={byId} lastDraw={lastDraw}
               setLastDraw={setLastDraw} setMatches={setMatches} setPairs={setPairs} setPlayers={setPlayers} flash={flash} share={share}
+              settings={settings}
             />
           )}
           {tab === "stats" && (
@@ -397,6 +511,13 @@ function PlayersTab({ players, pairs, byId, stats, patch, remove, addFromText, s
   const [asGuest, setAsGuest] = useState(false);
   const [openId, setOpenId] = useState(null);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [sortDir, setSortDir] = useState("az");
+
+  const q = query.trim().toLowerCase();
+  const visible = players
+    .filter((p) => !q || p.name.toLowerCase().includes(q))
+    .sort((a, b) => (sortDir === "az" ? 1 : -1) * a.name.localeCompare(b.name, "pl", { sensitivity: "base" }));
 
   const doAdd = () => {
     const n = addFromText(paste, asGuest);
@@ -448,18 +569,44 @@ function PlayersTab({ players, pairs, byId, stats, patch, remove, addFromText, s
 
       {/* roster header */}
       {players.length > 0 && (
-        <div className="flex items-center gap-2 px-1">
-          <h2 className="font-bold text-sm text-slate-600">Lista ({players.length})</h2>
-          <div className="ml-auto flex gap-1.5">
-            <button onClick={() => setAll(true)} className="text-xs font-semibold px-2.5 py-1 rounded-lg border bg-white" style={{ borderColor: "#dbe2e5", color: PITCH }}>Wszyscy</button>
-            <button onClick={() => setAll(false)} className="text-xs font-semibold px-2.5 py-1 rounded-lg border bg-white" style={{ borderColor: "#dbe2e5", color: "#94a3b8" }}>Nikt</button>
+        <>
+          <div className="flex items-center gap-2 px-1">
+            <h2 className="font-bold text-sm text-slate-600">Lista ({players.length})</h2>
+            <div className="ml-auto flex gap-1.5">
+              <button onClick={() => setAll(true)} className="text-xs font-semibold px-2.5 py-1 rounded-lg border bg-white" style={{ borderColor: "#dbe2e5", color: PITCH }}>Wszyscy</button>
+              <button onClick={() => setAll(false)} className="text-xs font-semibold px-2.5 py-1 rounded-lg border bg-white" style={{ borderColor: "#dbe2e5", color: "#94a3b8" }}>Nikt</button>
+            </div>
           </div>
-        </div>
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Szukaj zawodnika…"
+                className="w-full text-sm rounded-xl border pl-9 pr-8 py-2.5 outline-none bg-white"
+                style={{ borderColor: "#dbe2e5" }}
+              />
+              {query && (
+                <button onClick={() => setQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-300"><X size={16} /></button>
+              )}
+            </div>
+            <button
+              onClick={() => setSortDir((d) => (d === "az" ? "za" : "az"))}
+              className="shrink-0 flex items-center gap-1 text-xs font-bold px-3 rounded-xl border bg-white"
+              style={{ borderColor: "#dbe2e5", color: PITCH }}
+              title="Zmień kolejność"
+            >
+              {sortDir === "az" ? <ArrowDownAZ size={16} /> : <ArrowUpAZ size={16} />}
+              {sortDir === "az" ? "A-Z" : "Z-A"}
+            </button>
+          </div>
+        </>
       )}
 
       {/* roster */}
       <div className="space-y-2">
-        {players.map((p) => {
+        {visible.map((p) => {
           const open = openId === p.id;
           return (
             <div key={p.id} className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: p.present ? "#c7e8d5" : "#eef1f2" }}>
@@ -509,6 +656,10 @@ function PlayersTab({ players, pairs, byId, stats, patch, remove, addFromText, s
                       <Stars value={p[c.k]} onChange={(v) => patch(p.id, { [c.k]: v })} />
                     </div>
                   ))}
+                  <div className="flex items-center justify-between pt-2 mt-1 border-t" style={{ borderColor: "#eef1f2" }}>
+                    <span className="text-sm font-bold text-slate-600">Razem</span>
+                    <span className="text-sm font-black" style={{ color: GOLD }}>{overall(p)} / 20</span>
+                  </div>
                   <div className="flex items-center gap-2 mt-2 pt-2 border-t" style={{ borderColor: "#eef1f2" }}>
                     <button
                       onClick={() => patch(p.id, { isGK: !p.isGK })}
@@ -539,6 +690,9 @@ function PlayersTab({ players, pairs, byId, stats, patch, remove, addFromText, s
           <div className="text-center text-sm text-slate-400 py-10">
             Jeszcze nikogo nie ma.<br />Wklej listę imion powyżej, żeby zacząć.
           </div>
+        )}
+        {players.length > 0 && visible.length === 0 && (
+          <div className="text-center text-sm text-slate-400 py-8">Nikogo nie znaleziono dla „{query}".</div>
         )}
       </div>
 
@@ -621,7 +775,7 @@ function RulesSection({ open, setOpen, players, byId, pairs, setPairs, flash }) 
 }
 
 /* -------------------------------- DRAW TAB -------------------------------- */
-function DrawTab({ present, players, pairs, byId, lastDraw, setLastDraw, setMatches, setPairs, setPlayers, flash, share }) {
+function DrawTab({ present, players, pairs, byId, lastDraw, setLastDraw, setMatches, setPairs, setPlayers, flash, share, settings }) {
   const [error, setError] = useState("");
   const [mode, setMode] = useState("balanced");
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -684,17 +838,53 @@ function DrawTab({ present, players, pairs, byId, lastDraw, setLastDraw, setMatc
     syncMatch(teamA, teamB);
   };
 
+  const buildAdj = (winner, teamA, teamB) => {
+    const adj = {};
+    if (winner === "draw") return adj;
+    const winners = winner === "A" ? teamA : teamB;
+    const losers = winner === "A" ? teamB : teamA;
+    const pick = (p, dir) => {
+      const opts = CATS.filter((c) => (dir > 0 ? (p[c.k] || 0) < 5 : (p[c.k] || 0) > 0));
+      return opts.length ? opts[(Math.random() * opts.length) | 0].k : null;
+    };
+    [[winners, 1], [losers, -1]].forEach(([ids, d]) =>
+      ids.forEach((id) => {
+        const p = byId[id];
+        if (!p) return;
+        const k = pick(p, d);
+        if (k) adj[id] = { k, d };
+      })
+    );
+    return adj;
+  };
+  const applyAdj = (adj, sign) => {
+    if (!adj || !Object.keys(adj).length) return;
+    setPlayers((ps) => ps.map((p) => {
+      const a = adj[p.id];
+      if (!a) return p;
+      return { ...p, [a.k]: clamp((p[a.k] || 3) + a.d * sign, 0, 5) };
+    }));
+  };
+
   const saveResult = (winner) => {
     if (!lastDraw) return;
+    const auto = settings.autoRate !== false;
+    if (lastDraw.adj) applyAdj(lastDraw.adj, -1); // cofnij poprzednią korektę
+    const adj = auto ? buildAdj(winner, lastDraw.teamA, lastDraw.teamB) : null;
+    if (adj) applyAdj(adj, 1);
+
     if (lastDraw.matchId) {
       setMatches((ms) => ms.map((m) => (m.id === lastDraw.matchId ? { ...m, winner } : m)));
-      setLastDraw({ ...lastDraw, winner });
+      setLastDraw({ ...lastDraw, winner, adj });
       flash("Wynik poprawiony");
     } else {
       const id = uid();
       setMatches((ms) => [...ms, { id, date: new Date().toISOString(), teamA: lastDraw.teamA, teamB: lastDraw.teamB, winner }]);
-      setLastDraw({ ...lastDraw, saved: true, winner, matchId: id });
-      flash(winner === "draw" ? "Zapisano remis" : `Zapisano wygraną: ${winner === "A" ? TEAMS[0].nick : TEAMS[1].nick}`);
+      setLastDraw({ ...lastDraw, saved: true, winner, matchId: id, adj });
+      const n = adj ? Object.keys(adj).length : 0;
+      flash(winner === "draw"
+        ? "Zapisano remis — oceny bez zmian"
+        : `Zapisano: ${winner === "A" ? TEAMS[0].nick : TEAMS[1].nick}${n ? ` · oceny zmienione (${n})` : ""}`);
     }
     setEditing(false);
   };
@@ -842,6 +1032,19 @@ function DrawTab({ present, players, pairs, byId, lastDraw, setLastDraw, setMatc
                 {editing ? "Kliknij drużynę, aby nadpisać zapisany wynik." : "Zapis blokuje się po kliknięciu — bez podwójnego dopisania."}
               </p>
             )}
+            {lastDraw.adj && Object.keys(lastDraw.adj).length > 0 && (
+              <div className="mt-3 pt-3 border-t" style={{ borderColor: "#f1f5f4" }}>
+                <p className="text-xs font-bold text-slate-500 mb-1.5">Zmiany ocen po meczu</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(lastDraw.adj).map(([id, a]) => byId[id] && (
+                    <span key={id} className="text-[11px] font-semibold px-2 py-1 rounded-lg"
+                      style={{ background: a.d > 0 ? "#ecfdf5" : "#fef2f2", color: a.d > 0 ? "#047857" : "#b91c1c" }}>
+                      {byId[id].name} {a.d > 0 ? "+1" : "−1"} {CATS.find((c) => c.k === a.k)?.label.toLowerCase()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         </>
       )}
@@ -859,6 +1062,7 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
   const [pasteText, setPasteText] = useState("");
   const fileRef = useRef(null);
   const th = settings.streakThreshold;
+  const auto = settings.autoRate !== false;
 
   const downloadFile = () => {
     try {
@@ -886,7 +1090,7 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
     setPendingImport(null); setPasteText(""); setPasteOpen(false);
   };
 
-  const suggestions = players
+  const suggestions = (auto ? [] : players)
     .map((p) => ({ p, s: stats[p.id] }))
     .filter(({ p, s }) => {
       if (!s || Math.abs(s.streak) < th) return false;
@@ -895,7 +1099,7 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
 
   const applyBump = (p, dir) => {
     const upd = {};
-    CATS.forEach((c) => (upd[c.k] = clamp((p[c.k] || 3) + dir, 1, 5)));
+    CATS.forEach((c) => (upd[c.k] = clamp((p[c.k] || 3) + dir, 0, 5)));
     patch(p.id, upd);
     setDismissed((d) => ({ ...d, [p.id]: stats[p.id].streak }));
     flash(dir > 0 ? `${p.name}: podniesiono oceny` : `${p.name}: obniżono oceny`);
@@ -910,6 +1114,22 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
     setDismissed({});
     setConfirmReset(false);
     flash("Wyniki wyczyszczone");
+  };
+
+  const makeViewLink = () => {
+    if (!matches.length && !players.length) { flash("Brak danych do udostępnienia"); return; }
+    const rows = [...players]
+      .filter((p) => stats[p.id]?.played > 0)
+      .sort((a, b) => stats[b.id].winRate - stats[a.id].winRate)
+      .map((p) => [p.name, stats[p.id].played, stats[p.id].wins, stats[p.id].draws, stats[p.id].losses, stats[p.id].winRate]);
+    const ms = matches.map((m) => [new Date(m.date).toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit" }), m.winner, m.teamA.length, m.teamB.length]);
+    const payload = { t: new Date().toLocaleDateString("pl-PL"), p: rows, m: ms };
+    const enc = encodePayload(payload);
+    if (!enc) { flash("Nie udało się utworzyć linku"); return; }
+    let base = "";
+    try { base = window.location.origin + window.location.pathname; } catch { base = ""; }
+    const url = `${base}#v=${enc}`;
+    share(`⚽ Dokersi — wyniki\n${url}`);
   };
 
   const exportResults = () => {
@@ -957,14 +1177,32 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
         </section>
       )}
 
+      {/* auto rating */}
+      <section className="bg-white rounded-2xl p-4 border" style={{ borderColor: "#e9eef0" }}>
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-bold text-slate-700">Automatyczne oceny po meczu</p>
+            <p className="text-xs text-slate-400 mt-0.5">Wygrani +1 gwiazdka, przegrani −1, w losowej kategorii. Remis nie zmienia nic.</p>
+          </div>
+          <button
+            onClick={() => setSettings((s) => ({ ...s, autoRate: !(s.autoRate !== false) }))}
+            className="shrink-0 h-7 w-12 rounded-full transition relative"
+            style={{ background: auto ? GOLD : "#cbd5e1" }}
+            aria-label="Przełącz automatyczne oceny"
+          >
+            <span className="absolute top-1 h-5 w-5 rounded-full bg-white transition-all" style={{ left: auto ? 26 : 4 }} />
+          </button>
+        </div>
+      </section>
+
       {/* threshold */}
-      <section className="bg-white rounded-2xl p-3 border flex items-center gap-2" style={{ borderColor: "#e9eef0" }}>
+      {!auto && <section className="bg-white rounded-2xl p-3 border flex items-center gap-2" style={{ borderColor: "#e9eef0" }}>
         <span className="text-sm text-slate-500 flex-1">Sugestia po serii</span>
         <button onClick={() => setSettings((s) => ({ ...s, streakThreshold: clamp(th - 1, 2, 20) }))} className="h-8 w-8 rounded-lg border text-slate-500 font-bold" style={{ borderColor: "#dbe2e5" }}>−</button>
         <span className="w-8 text-center font-black text-slate-800">{th}</span>
         <button onClick={() => setSettings((s) => ({ ...s, streakThreshold: clamp(th + 1, 2, 20) }))} className="h-8 w-8 rounded-lg border text-slate-500 font-bold" style={{ borderColor: "#dbe2e5" }}>+</button>
         <span className="text-sm text-slate-400">meczów</span>
-      </section>
+      </section>}
 
       {/* table */}
       <section className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#e9eef0" }}>
@@ -1040,6 +1278,9 @@ function StatsTab({ players, matches, stats, byId, settings, setSettings, dismis
               <button onClick={downloadFile} className="text-sm font-bold py-2.5 rounded-xl border" style={{ borderColor: "#dbe2e5", color: PITCH }}>Eksportuj plik</button>
               <button onClick={() => share(exportData())} className="text-sm font-bold py-2.5 rounded-xl border" style={{ borderColor: "#dbe2e5", color: PITCH }}>Eksportuj tekst</button>
             </div>
+            <button onClick={makeViewLink} className="w-full text-sm font-bold py-2.5 rounded-xl border" style={{ borderColor: GOLD, color: "#b45309", background: "#fffbeb" }}>
+              🔗 Link do podglądu wyników (tylko do odczytu)
+            </button>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => fileRef.current && fileRef.current.click()} className="text-sm font-bold py-2.5 rounded-xl text-white" style={{ background: PITCH }}>Wczytaj z pliku</button>
               <button onClick={() => setPasteOpen((v) => !v)} className="text-sm font-bold py-2.5 rounded-xl text-white" style={{ background: PITCH }}>Wklej i wczytaj</button>
